@@ -21,6 +21,8 @@
 #endif
 #endif  // _WIN32
 
+#include "env_utils.hpp"
+
 #ifdef _WIN32
 // for Windows
 
@@ -79,3 +81,10 @@ void SetCwd(const std::string& path) {
 }
 
 #endif  // _WIN32
+
+std::string GetDirectory(const std::string& path) {
+    size_t pos = path.find_last_of("/\\");
+    return (std::string::npos == pos)
+        ? ""
+        : path.substr(0, pos);
+}

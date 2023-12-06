@@ -134,6 +134,7 @@ int PngReader::ReadFromFile(const char* file_name)
             printf("last row: %u\n", row_info.row_num);
     }
 
+    // We should convert the raw data to the libui format
     bgr_to_rgb(image, ihdr.width, ihdr.height);
     premultiply_alpha(image, ihdr.width, ihdr.height);
 

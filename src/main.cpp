@@ -2,13 +2,11 @@
 #include <string.h>
 #include <cmath>
 #include "ui.h"
-#include "png_reader.hpp"
-#include "sprite.hpp"
-#include "demo_sprites.hpp"
-#include "env_utils.hpp"
+#include "demo_sprites.hpp"  // DemoSpriteHandler
+#include "env_utils.hpp"  // GetExecutablePath(), SetCwd(), GetDirectory()
 
 uiAreaHandler g_handler;
-DemoSprites g_sprites;
+DemoSpriteHandler g_sprite_handler;
 
 // helper to quickly set a brush color
 static void SetSolidBrush(uiDrawBrush *brush, uint32_t color, double alpha)
@@ -25,9 +23,17 @@ static void SetSolidBrush(uiDrawBrush *brush, uint32_t color, double alpha)
     brush->A = alpha;
 }
 
-// This will be called by uiAreaQueueRedrawAll
+// This will be called by uiAreaQueueRedrawAll and uiControlShow
 static void HandlerDraw(uiAreaHandler *a, uiArea *area, uiAreaDrawParams *p)
 {
+    if (g_sprite_handler.HasError()) return;  // When failed to load sprites
+
+    if (!g_sprite_handler.HasImage()) {
+        // Load sprites when this handler is called by uiControlShow()
+        g_sprite_handler.LoadSprites(p->Context);
+        if (g_sprite_handler.HasError()) return;
+    }
+
     // fill the area
     uiDrawPath *path;
     uiDrawBrush brush;
@@ -39,13 +45,21 @@ static void HandlerDraw(uiAreaHandler *a, uiArea *area, uiAreaDrawParams *p)
     uiDrawFreePath(path);
 
     // draw sprites
-    g_sprites.DrawSprites(p->Context);
+    g_sprite_handler.DrawSprites(p->Context);
 }
 
 static void HandlerMouseEvent(uiAreaHandler *a, uiArea *area, uiAreaMouseEvent *e)
 {
+    if (g_sprite_handler.HasError()) return;
+
     // Move car to mouse
-    g_sprites.SetCarTargetX(e->X);
+    g_sprite_handler.SetCarTargetX(e->X);
+
+    if (e->Down)
+        g_sprite_handler.RotateCar();
+
+    if (e->Up)
+        g_sprite_handler.ResetCarRotation();
 }
 
 static void HandlerMouseCrossed(uiAreaHandler *ah, uiArea *a, int left)
@@ -79,7 +93,7 @@ static int OnShouldQuit(void *data)
 
 static int OnAnimating(void *data)
 {
-    g_sprites.MoveSprites();
+    g_sprite_handler.MoveSprites();
     uiAreaQueueRedrawAll(uiArea(data));
     return 1;
 }
@@ -107,16 +121,15 @@ void CreateWindow()
     uiArea *area = uiNewArea(&g_handler);
     uiBoxAppend(vbox, uiControl(area), 1);
 
+    // Call OnAnimating every 10ms to move sprites
     uiTimer(10, OnAnimating, area);
 
-    // Load sprites
-    int ret = g_sprites.LoadSprites(area);
-    if (ret) {
-        uiMsgBoxError(mainwin, "Failed to load sprites.", g_sprites.GetErrorMsg());
-    }
-
-    // Make them visible
+    // Make them visible and call HandlerDraw() to load sprites
     uiControlShow(uiControl(mainwin));
+
+    if (g_sprite_handler.HasError()) {
+        uiMsgBoxError(mainwin, "Failed to load sprites.", g_sprite_handler.GetErrorMsg());
+    }
 }
 
 int main(void)
@@ -135,7 +148,7 @@ int main(void)
 
     // Change cwd to exe path to read image files
     std::string exe_path = GetExecutablePath();
-    SetCwd(exe_path);
+    SetCwd(GetDirectory(exe_path));
 
     // Craete main window
     CreateWindow();

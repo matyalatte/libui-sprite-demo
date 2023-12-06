@@ -8,6 +8,8 @@
 subprojects/libui
 subprojects/miniz*
 subprojects/spng
+subprojects/cmocka*
+subprojects/zlib*
 
 # built files
 libui_rubiks_demo

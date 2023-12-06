@@ -2,6 +2,7 @@
 #include "ui.h"
 #include "png_reader.hpp"
 
+// wrapper for uiImageBuffer
 class ImageBuffer {
  private:
     uiImageBuffer *m_image_buffer;
@@ -12,14 +13,19 @@ class ImageBuffer {
  public:
     ImageBuffer() : m_image_buffer(NULL) {}
 
-    int CreateFromPng(uiArea *area, const char* file_name)
+    ~ImageBuffer() {
+        if (m_image_buffer)
+            uiFreeImageBuffer(m_image_buffer);
+    }
+
+    int CreateFromPng(uiDrawContext *c, const char* file_name)
     {
         PngReader reader;
         int ret = reader.ReadFromFile(file_name);
         if (ret) return 1;
         reader.GetSize(&m_width, &m_height);
         m_has_alpha = reader.HasAlpha();
-        m_image_buffer = uiNewImageBuffer(area, m_width, m_height, m_has_alpha);
+        m_image_buffer = uiNewImageBuffer(c, m_width, m_height, m_has_alpha);
         uiImageBufferUpdate(m_image_buffer, reader.GetData());
         return 0;
     }
@@ -43,21 +49,10 @@ class Sprite {
  protected:
     uiImageBuffer *m_image_buffer;
     uiRect m_src_rect;  // sprite area in the image buffer
-
-    // conter point of the sprite
-    double m_cx;
-    double m_cy;
-
-    // coordinates of the center point in uiArea
-    double m_x;
-    double m_y;
-
-    // scale
-    double m_sx;
-    double m_sy;
-
-    // rotation angle
-    double m_rad;
+    double m_cx, m_cy;  // conter point of the sprite
+    double m_x, m_y;  // coordinates of the center point in uiArea
+    double m_sx, m_sy;  // scale
+    double m_rad;  // rotation angle
 
  public:
     Sprite() : m_image_buffer(NULL),
@@ -84,18 +79,20 @@ class Sprite {
     void Draw(uiDrawContext *c)
     {
         uiDrawSave(c);
-        uiDrawMatrix rm, sm;
+
+        uiDrawMatrix rm;
         uiDrawMatrixSetIdentity(&rm);
-        uiDrawMatrixSetIdentity(&sm);
-
-        uiDrawMatrixRotate(&rm, m_x, m_x, m_rad);
-        uiDrawMatrixScale(&sm, m_x, m_y, m_sx, m_sy);
+        uiDrawMatrixRotate(&rm, m_x, m_y, m_rad);
         uiDrawTransform(c, &rm);
-        uiDrawTransform(c, &sm);
 
-        uiRect dstrect = { m_x - m_cx, m_y - m_cy, m_src_rect.Width, m_src_rect.Height };
+        uiRect dstrect = {
+            (int)(m_x - m_cx * m_sx),
+            (int)(m_y - m_cy * m_sy),
+            (int)(m_src_rect.Width * m_sx),
+            (int)(m_src_rect.Height * m_sy)
+        };
         uiImageBufferDraw(c, m_image_buffer, &m_src_rect, &dstrect, 1);
 
-        uiDrawRestore(c);
+        uiDrawRestore(c);  // reset matrix for other sprites
     }
 };
