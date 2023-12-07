@@ -17,7 +17,7 @@ You can install meson and ninja via Homebrew. (`brew install meson ninja`)
 ```shell
 meson setup build --native-file presets/release.ini
 meson compile -C build
-strip ./build/libui_rubiks_demo
+strip ./build/libui_sprite_demo
 ```
 
 The executable will be generated in `build`.  

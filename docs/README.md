@@ -6,13 +6,13 @@ https://github.com/matyalatte/libui-sprite-demo/assets/69258547/41914efa-f9a0-47
 > :warning: This demo uses [a forked branch](https://github.com/matyalatte/libui-ng/tree/image_buffer) for `uiImageBuffer`.
 > The official libui-ng doesn't support it yet.
 
-## How It Work
+## How It Works
 
 You can create image buffers with `uiNewImageBuffer` and `uiImageBufferUpdate`.  
 
 ```c
 uiImageBuffer* image = uiNewImageBuffer(draw_context, width, height, has_alpha);
-uiImageBufferUpdate(image, data);  // the size of data is width * height * 4
+uiImageBufferUpdate(image, data);  // the size of data should be width * height * 4
 
 // You should free the buffer with uiFreeImageBuffer later
 ```
@@ -34,7 +34,7 @@ uiDrawMatrixSetIdentity(&m);
 uiDrawMatrixRotate(&m, x, y, rad);
 uiDrawTransform(draw_context, &m);
 
-uiRect dstrect = {
+uiRect dst_rect = {
     (int)(x - cx * sx),
     (int)(y - cy * sy),
     (int)(src_rect.Width * sx),
