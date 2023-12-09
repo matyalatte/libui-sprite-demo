@@ -20,18 +20,6 @@ static int has_alpha(uint8_t color_type)
     return color_type == SPNG_COLOR_TYPE_GRAYSCALE_ALPHA || color_type == SPNG_COLOR_TYPE_TRUECOLOR_ALPHA;
 }
 
-static void bgr_to_rgb(unsigned char *image, int width, int height)
-{
-    unsigned char *offset = image;
-    for (int i = 0; i < width * height; i++) {
-        unsigned char b = offset[0];
-        unsigned char r = offset[2];
-        offset[0] = r;
-        offset[2] = b;
-        offset += 4;
-    }
-}
-
 static void premultiply_alpha(unsigned char *image, int width, int height)
 {
     unsigned char *offset = image;
@@ -135,7 +123,6 @@ int PngReader::ReadFromFile(const char* file_name)
     }
 
     // We should convert the raw data to the libui format
-    bgr_to_rgb(image, ihdr.width, ihdr.height);
     premultiply_alpha(image, ihdr.width, ihdr.height);
 
     m_data = image;

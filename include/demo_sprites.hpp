@@ -96,7 +96,7 @@ class Car : public Sprite {
                 m_x -= 2.0;
         }
 
-        m_rad += std::fmod(m_rad_speed, 2 * uiPi);
+        m_rad = std::fmod(m_rad + m_rad_speed, 2 * uiPi);
     }
 
     void SetTargetX(double mouse_x)
