@@ -91,7 +91,7 @@ class Sprite {
             (int)(m_src_rect.Width * m_sx),
             (int)(m_src_rect.Height * m_sy)
         };
-        uiImageBufferDraw(c, m_image_buffer, &m_src_rect, &dstrect, 1);
+        uiImageBufferDraw(c, m_image_buffer, &m_src_rect, &dstrect);
 
         uiDrawRestore(c);  // reset matrix for other sprites
     }

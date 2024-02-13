@@ -17,7 +17,7 @@ uiImageBufferUpdate(image, data);  // the size of data should be width * height 
 // You should free the buffer with uiFreeImageBuffer later
 ```
 
-Then, you can draw it with `uiImageBufferDraw`.  
+Then, you can draw it with `uiImageBufferDraw` or `uiImageBufferDrawFast`.  
 You can also apply affine transformation with `uiDrawTransform`.  
 
 ```c
@@ -40,7 +40,7 @@ uiRect dst_rect = {
     (int)(src_rect.Width * sx),
     (int)(src_rect.Height * sy)
 };
-uiImageBufferDraw(draw_context, image, &src_rect, &dst_rect, 1);  // 1 means linear interpolation
+uiImageBufferDraw(draw_context, image, &src_rect, &dst_rect);
 
 uiDrawRestore(draw_context);  // reset matrix for other sprites
 ```
