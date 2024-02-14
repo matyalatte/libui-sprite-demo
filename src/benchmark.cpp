@@ -134,16 +134,11 @@ class SpriteHandler {
     void CheckFPS()
     {
         clock_t current = clock();
-        if ((current - m_start) >= 2000) {
-            m_start = current;
-            m_step %= 200;
-            m_start_step = m_step;
-        }
-        if ((current - m_start) >= 1000) {
-            m_start += 1000;
-            int fps = m_step - m_start_step;
+        if ((current - m_start) >= CLOCKS_PER_SEC) {
+            double fps = (double)(m_step - m_start_step) * (double)CLOCKS_PER_SEC / (double)(current - m_start);
             std::string fps_str = "FPS: " + std::to_string(fps);
             uiLabelSetText(m_label_fps, fps_str.c_str());
+            m_start = current;
             m_step %= 200;
             m_start_step = m_step;
         }
