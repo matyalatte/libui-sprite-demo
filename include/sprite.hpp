@@ -30,6 +30,19 @@ class ImageBuffer {
         return 0;
     }
 
+    void Create(uiDrawContext *c, int width, int height, int has_alpha)
+    {
+        m_width = width;
+        m_height = height;
+        m_has_alpha = has_alpha;
+        m_image_buffer = uiNewImageBuffer(c, m_width, m_height, m_has_alpha);
+    }
+
+    void Update(const void* data)
+    {
+        uiImageBufferUpdate(m_image_buffer, data);
+    }
+
     void GetSize(int *width, int *height)
     {
         *width = m_width;
@@ -92,6 +105,26 @@ class Sprite {
             (int)(m_src_rect.Height * m_sy)
         };
         uiImageBufferDraw(c, m_image_buffer, &m_src_rect, &dstrect);
+
+        uiDrawRestore(c);  // reset matrix for other sprites
+    }
+
+    void DrawFast(uiDrawContext *c)
+    {
+        uiDrawSave(c);
+
+        uiDrawMatrix rm;
+        uiDrawMatrixSetIdentity(&rm);
+        uiDrawMatrixRotate(&rm, m_x, m_y, m_rad);
+        uiDrawTransform(c, &rm);
+
+        uiRect dstrect = {
+            (int)(m_x - m_cx * m_sx),
+            (int)(m_y - m_cy * m_sy),
+            (int)(m_src_rect.Width * m_sx),
+            (int)(m_src_rect.Height * m_sy)
+        };
+        uiImageBufferDrawFast(c, m_image_buffer, &m_src_rect, &dstrect);
 
         uiDrawRestore(c);  // reset matrix for other sprites
     }

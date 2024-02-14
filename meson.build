@@ -86,3 +86,17 @@ executable('libui_sprites_demo',
     win_subsystem: 'windows')
 
 subdir('sprites')
+
+bench_sources = [
+    'src/benchmark.cpp',
+    'src/png_reader.cpp',
+    'src/env_utils.cpp'
+]
+
+executable('sprites_bench',
+    proj_manifest + bench_sources,
+    dependencies: [libui_dep, spng_dep],
+    cpp_args: proj_cpp_args,
+    link_args: proj_link_args,
+    include_directories: include_directories('include'),
+    install: false)
